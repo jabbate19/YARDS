@@ -36,12 +36,12 @@ jobs:
     - name: Run Migrations
       working-directory: ./yards-api
       env:
-        - DATABASE_URL=postgres://postgres:postgres@postgres/yards
+        DATABASE_URL: postgres://postgres:postgres@postgres/yards
       run: sqlx migrate run
     - name: Build
       working-directory: ./yards-api
       env:
-        - DATABASE_URL=postgres://postgres:postgres@postgres/yards
+        DATABASE_URL: postgres://postgres:postgres@postgres/yards
       run: cargo build --verbose
     - name: Run tests
       working-directory: ./yards-api
