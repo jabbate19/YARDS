@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run Clippy
-        working-directory: ./yards-api
+        working-directory: ./yards-frontend
+        env:
+          SQLX_OFFLINE: true
         run: cargo clippy --all-targets --all-features -- -D warnings
   build:
     runs-on: ubuntu-latest

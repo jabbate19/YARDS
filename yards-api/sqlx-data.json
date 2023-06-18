@@ -1,0 +1,378 @@
+{
+  "db": "PostgreSQL",
+  "12f7feec584b226f6ee874c5ddf449d1b789cb3a2f742aff8fad2ff3427a2400": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "ipversion: IPVersion",
+          "ordinal": 2,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "v4",
+                  "v6",
+                  "V4",
+                  "V6"
+                ]
+              },
+              "name": "ipversion"
+            }
+          }
+        },
+        {
+          "name": "networkid",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "cidr",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "description",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT id, name, ipversion AS \"ipversion: IPVersion\", networkid, cidr, description FROM iprange"
+  },
+  "1e80a84e7ff0ae770b63485de1adb0ef3f13192d80c0c07bd076fa32e543759e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "zoneid",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "key",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "recordtype: DNSRecordType",
+          "ordinal": 3,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "A",
+                  "AAAA",
+                  "NS",
+                  "MX",
+                  "CNAME",
+                  "SOA",
+                  "SRV",
+                  "PTR"
+                ]
+              },
+              "name": "dnsrecordtype"
+            }
+          }
+        },
+        {
+          "name": "ttl",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "value",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT id, zoneid, key, recordtype AS \"recordtype: DNSRecordType\", ttl, value FROM dnsrecord WHERE zoneid = $1"
+  },
+  "58aa61818d0e0908e38663ee7095ffae6a0d1534e1bbe0bd7f7deacbbffdce4a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "iprangeid",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "zoneid",
+          "ordinal": 1,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM ddns"
+  },
+  "7f38afca94ae89f53586e2dc276ed804946e04c9041938df6797924ab49d9a95": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO server(name, tokenhash) VALUES ($1, $2)"
+  },
+  "8935a70b5c0e718f9905531fb0e44968e4b82f34081fed2ab4d06adad3f08d2b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "tokenhash",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "lastcheckin",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM server"
+  },
+  "989d5be7d0d323e9f6fe83f5cac45e87c01da3679fc9b6f1d485becbb68293e1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "ipversion: _",
+          "ordinal": 2,
+          "type_info": {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "v4",
+                  "v6",
+                  "V4",
+                  "V6"
+                ]
+              },
+              "name": "ipversion"
+            }
+          }
+        },
+        {
+          "name": "networkid",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "cidr",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "description",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          {
+            "Custom": {
+              "kind": {
+                "Enum": [
+                  "v4",
+                  "v6",
+                  "V4",
+                  "V6"
+                ]
+              },
+              "name": "ipversion"
+            }
+          },
+          "Varchar",
+          "Int4",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "INSERT INTO iprange(name, ipversion, networkid, cidr, description) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, ipversion as \"ipversion: _\", networkid, cidr, description"
+  },
+  "b63236fd3200bacf6ab300712a6e21de24dd88b150d8940941168c9e881e3e0b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "iprangeid",
+          "ordinal": 1,
+          "type_info": "Int4"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "dhcpstart",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "dhcpend",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "gateway",
+          "ordinal": 5,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "default_dns",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "lease_time",
+          "ordinal": 7,
+          "type_info": "Int4"
+        },
+        {
+          "name": "serverid",
+          "ordinal": 8,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      }
+    },
+    "query": "SELECT * FROM dhcprange WHERE iprangeid = $1"
+  },
+  "c01465bcefb4c57b7f0fe836c943ce208af5e5010b43de9e4c4514feb37d736a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "zonename",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "serverid",
+          "ordinal": 2,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM dnszone"
+  }
+}

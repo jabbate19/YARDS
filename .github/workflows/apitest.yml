@@ -11,6 +11,13 @@ env:
   DATABASE_URL: postgres://postgres:postgres@localhost/yards
 
 jobs:
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Clippy
+        working-directory: ./yards-api
+        run: cargo clippy --all-targets --all-features -- -D warnings
   build:
     runs-on: ubuntu-latest
     services:
@@ -41,9 +48,6 @@ jobs:
     - name: Build
       working-directory: ./yards-api
       run: cargo build --verbose
-    - name: Run Clippy
-      working-directory: ./yards-api
-      run: cargo clippy --all-targets --all-features -- -D warnings
     - name: Run tests
       working-directory: ./yards-api
       run: cargo test --verbose
