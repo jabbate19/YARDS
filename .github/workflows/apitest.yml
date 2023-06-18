@@ -12,6 +12,7 @@ env:
 
 jobs:
   clippy_check:
+    name: Check Clippy for Formatting Errors
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,6 +22,7 @@ jobs:
           SQLX_OFFLINE: true
         run: cargo clippy --all-targets --all-features -- -D warnings
   build:
+    name: Build Code and Run Tests
     runs-on: ubuntu-latest
     services:
       # Label used to access the service container
