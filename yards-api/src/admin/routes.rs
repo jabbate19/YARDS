@@ -7,11 +7,11 @@ use actix_web::{
     web::{Data, Json, Path},
     HttpResponse, Responder,
 };
+use base64::{engine::general_purpose, Engine as _};
 use passwords::PasswordGenerator;
-use base64::{Engine as _, engine::general_purpose};
 use serde_json::json;
+use sha2::{Digest, Sha512};
 use sqlx::{query, query_as};
-use sha2::{Sha512, Digest};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -49,14 +49,17 @@ pub async fn register_server(state: Data<AppState>, server: Json<Server>) -> imp
     let mut hasher = Sha512::new();
     hasher.update(&new_token);
     let result = hasher.finalize();
-    match query!("INSERT INTO server(name, tokenhash) VALUES ($1, $2)", server.name, general_purpose::STANDARD_NO_PAD.encode(result))
-        .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Created().json(json!({
-                "token": new_token
-            })),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+    match query!(
+        "INSERT INTO server(name, tokenhash) VALUES ($1, $2)",
+        server.name,
+        general_purpose::STANDARD_NO_PAD.encode(result)
+    )
+    .execute(&state.db)
+    .await
+    {
+        Ok(_) => HttpResponse::Created().json(json!({ "token": new_token })),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(

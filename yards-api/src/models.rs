@@ -75,7 +75,7 @@ pub struct StaticAddress {
 #[sqlx(type_name = "ipversion")]
 pub enum IPVersion {
     V4,
-    V6
+    V6,
 }
 
 #[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
