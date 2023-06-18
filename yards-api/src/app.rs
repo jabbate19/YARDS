@@ -1,4 +1,4 @@
-use crate::{admin::routes::*, models::*};
+use crate::{admin::*, models::*};
 
 use actix_web::web::{self, scope, Data};
 
@@ -14,12 +14,12 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
     #[derive(OpenApi)]
     #[openapi(
         paths(
-            get_servers,
-            get_ip_range,
-            get_ip_range_dhcp,
-            get_ddns,
-            get_dns_zones,
-            get_dns_zone_records
+            server::get_servers,
+            iprange::get_ip_range,
+            dhcprange::get_ip_range_dhcp,
+            ddns::get_ddns,
+            dnszone::get_dns_zones,
+            dnsrecord::get_dns_zone_records
         ),
         components(
             schemas(APIKey, KeyPermissions, Logs, Device, Interface, Address, IPType, StaticAddress, IPVersion, IPRange, Server, DDNS, DNSZone, DNSRecord, DNSRecordType, DHCPRange)
@@ -46,14 +46,14 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
     let openapi = ApiDoc::openapi();
     cfg.service(
         scope("/admin")
-            .service(get_ip_range)
-            .service(add_range)
-            .service(get_ip_range_dhcp)
-            .service(get_servers)
-            .service(register_server)
-            .service(get_ddns)
-            .service(get_dns_zones)
-            .service(get_dns_zone_records),
+            .service(iprange::get_ip_range)
+            .service(iprange::add_range)
+            .service(dhcprange::get_ip_range_dhcp)
+            .service(server::get_servers)
+            .service(server::register_server)
+            .service(ddns::get_ddns)
+            .service(dnszone::get_dns_zones)
+            .service(dnsrecord::get_dns_zone_records),
     )
     .service(scope("/agent"))
     .service(scope("/datadog"))
