@@ -1,0 +1,22 @@
+name: API Test
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      working-directory: ./yards-api
+      run: cargo build --verbose
+    - name: Run tests
+      working-directory: ./yards-api
+      run: cargo test --verbose
