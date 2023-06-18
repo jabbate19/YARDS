@@ -4,7 +4,6 @@ use sqlx::{
     types::chrono::{DateTime, Utc},
     FromRow, Pool, Postgres,
 };
-use std::fmt;
 use utoipa::ToSchema;
 
 pub struct AppState {

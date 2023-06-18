@@ -1,9 +1,9 @@
 use crate::models::{
-    AppState, DHCPRange, DNSRecord, DNSRecordType, DNSZone, IPRange, IPType, IPVersion, Server,
+    AppState, DHCPRange, DNSRecord, DNSRecordType, DNSZone, IPRange, IPVersion, Server,
     DDNS,
 };
 use actix_web::{
-    delete, get, post, put,
+    get, post,
     web::{Data, Json, Path},
     HttpResponse, Responder,
 };
