@@ -10,8 +10,6 @@ env:
   CARGO_TERM_COLOR: always
   DATABASE_URL: postgres://postgres:postgres@localhost/yards
 
-working-directory: ./yards-api
-
 jobs:
   clippy_check:
     runs-on: ubuntu-latest
@@ -41,12 +39,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Add sqlx for Migrations
+      working-directory: ./yards-api
       run: cargo install sqlx-cli --no-default-features --features rustls,postgres
     - name: Run Migrations
+      working-directory: ./yards-api
       run: sqlx migrate run
     - name: Build
+      working-directory: ./yards-api
       run: cargo build --verbose
     - name: Run Clippy
+      working-directory: ./yards-api
       run: cargo clippy --all-targets --all-features -- -D warnings
     - name: Run tests
+      working-directory: ./yards-api
       run: cargo test --verbose
