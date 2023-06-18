@@ -2,35 +2,6 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.12
--- Dumped by pg_dump version 14.4
-
--- Started on 2023-06-17 23:18:42
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- TOC entry 713 (class 2612 OID 16404)
--- Name: plperl; Type: PROCEDURAL LANGUAGE; Schema: -; Owner: -
---
-
-CREATE OR REPLACE PROCEDURAL LANGUAGE plperl;
-
-
---
--- TOC entry 687 (class 1247 OID 29367401)
--- Name: dnsrecordtype; Type: TYPE; Schema: public; Owner: -
---
-
 CREATE TYPE public.dnsrecordtype AS ENUM (
     'A',
     'AAAA',
@@ -65,29 +36,6 @@ CREATE TYPE public.ipversion AS ENUM (
     'V4',
     'V6'
 );
-
-
---
--- TOC entry 226 (class 1255 OID 16405)
--- Name: plperl_call_handler(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.plperl_call_handler() RETURNS language_handler
-    LANGUAGE c
-    AS '$libdir/plperl', 'plperl_call_handler';
-
-
---
--- TOC entry 227 (class 1255 OID 16406)
--- Name: plpgsql_call_handler(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.plpgsql_call_handler() RETURNS language_handler
-    LANGUAGE c
-    AS '$libdir/plpgsql', 'plpgsql_call_handler';
-
-
-SET default_table_access_method = heap;
 
 --
 -- TOC entry 207 (class 1259 OID 29367183)
