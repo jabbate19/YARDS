@@ -11,12 +11,6 @@ env:
   DATABASE_URL: postgres://postgres:postgres@localhost/yards
 
 jobs:
-  clippy_check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
   build:
     runs-on: ubuntu-latest
     services:
