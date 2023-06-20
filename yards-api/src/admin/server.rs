@@ -3,8 +3,8 @@ use crate::models::{
 };
 use actix_web::{
     get, post,
-    web::{Data, Json},
-    HttpResponse, Responder,
+    web::{Data, Json, Path},
+    HttpResponse, Responder, delete,
 };
 use base64::{engine::general_purpose, Engine as _};
 use passwords::PasswordGenerator;
@@ -38,7 +38,7 @@ pub async fn get_servers(state: Data<AppState>) -> impl Responder {
     )
 )]
 #[post("/server")]
-pub async fn register_server(state: Data<AppState>, server: Json<Server>) -> impl Responder {
+pub async fn add_server(state: Data<AppState>, server: Json<Server>) -> impl Responder {
     let passgen = PasswordGenerator::new()
         .length(16)
         .uppercase_letters(true)
@@ -59,4 +59,25 @@ pub async fn register_server(state: Data<AppState>, server: Json<Server>) -> imp
         Ok(_) => HttpResponse::Created().json(json!({ "token": new_token })),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
+}
+
+#[utoipa::path(
+    context_path = "/admin",
+    responses(
+        (status = 200, description = "Server Deleted"),
+        (status = 500, description = "Error Created by Query"),
+    )
+)]
+#[delete("/server/{serverid}")]
+pub async fn delete_server(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
+    let (serverid,) = path.into_inner();
+    match query!(
+        "DELETE FROM server WHERE id = $1",
+        serverid
+    )
+        .execute(&state.db)
+        .await {
+            Ok(_) => HttpResponse::Ok().finish(),
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
+        }
 }

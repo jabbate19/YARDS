@@ -4,10 +4,10 @@ use crate::models::{
 };
 use actix_web::{
     get,
-    web::{Data},
-    HttpResponse, Responder,
+    web::{Data, Json, Path},
+    HttpResponse, Responder, post, delete,
 };
-use sqlx::{query_as};
+use sqlx::{query_as, query};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -25,4 +25,48 @@ pub async fn get_ddns(state: Data<AppState>) -> impl Responder {
         Ok(servers) => HttpResponse::Ok().json(servers),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
+}
+
+#[utoipa::path(
+    context_path = "/admin",
+    responses(
+        (status = 201, description = "DDNS Range Added"),
+        (status = 500, description = "Error Created by Query"),
+    )
+)]
+#[post("/ddns")]
+pub async fn add_ddns(state: Data<AppState>, range: Json<DDNS>) -> impl Responder {
+    match query_as!(
+        DDNS,
+        "INSERT INTO ddns(iprangeid, zoneid) VALUES ($1, $2) RETURNING iprangeid, zoneid",
+        range.iprangeid,
+        range.zoneid
+    )
+        .fetch_one(&state.db)
+        .await {
+            Ok(new_range) => HttpResponse::Created().json(new_range),
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
+        }
+}
+
+#[utoipa::path(
+    context_path = "/admin",
+    responses(
+        (status = 200, description = "DDNS Range Deleted"),
+        (status = 500, description = "Error Created by Query"),
+    )
+)]
+#[delete("/ddns/{iprangeid}/{zoneid}")]
+pub async fn delete_ddns(state: Data<AppState>, path: Path<(i32,i32,)>) -> impl Responder {
+    let (iprangeid,zoneid,) = path.into_inner();
+    match query!(
+        "DELETE FROM ddns WHERE iprangeid = $1 AND zoneid = $2",
+        iprangeid,
+        zoneid
+    )
+        .execute(&state.db)
+        .await {
+            Ok(_) => HttpResponse::Ok().finish(),
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
+        }
 }

@@ -106,10 +106,11 @@ pub struct DDNS {
 pub struct DNSZone {
     pub id: i32,
     pub zonename: String,
+    pub dnsroot: String,
     pub serverid: i32,
 }
 
-#[derive(sqlx::Type, Serialize, Deserialize, Clone, ToSchema, Debug, PartialEq)]
+#[derive(sqlx::Type, Copy, Serialize, Deserialize, Clone, ToSchema, Debug, PartialEq)]
 #[sqlx(type_name = "dnsrecordtype")]
 pub enum DNSRecordType {
     A,

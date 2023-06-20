@@ -31,8 +31,6 @@ CREATE TYPE public.iptype AS ENUM (
 --
 
 CREATE TYPE public.ipversion AS ENUM (
-    'v4',
-    'v6',
     'V4',
     'V6'
 );
