@@ -1,12 +1,10 @@
-use crate::models::{
-    AppState, IPRange, IPVersion,
-};
+use crate::models::{AppState, IPRange, IPVersion};
 use actix_web::{
-    get, post,
+    delete, get, post, put,
     web::{Data, Json, Path},
-    HttpResponse, Responder, delete, put,
+    HttpResponse, Responder,
 };
-use sqlx::{query_as, query};
+use sqlx::{query, query_as};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -58,15 +56,13 @@ pub async fn add_ip_range(state: Data<AppState>, range: Json<IPRange>) -> impl R
 #[delete("/iprange/{rangeid}")]
 pub async fn delete_ip_range(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
     let (rangeid,) = path.into_inner();
-    match query!(
-        "DELETE FROM iprange WHERE id = $1",
-        rangeid
-    )
+    match query!("DELETE FROM iprange WHERE id = $1", rangeid)
         .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Ok().finish(),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(
@@ -77,7 +73,11 @@ pub async fn delete_ip_range(state: Data<AppState>, path: Path<(i32,)>) -> impl 
     )
 )]
 #[put("/iprange/{rangeid}")]
-pub async fn edit_ip_range(state: Data<AppState>, range: Json<IPRange>, path: Path<(i32,)>) -> impl Responder {
+pub async fn edit_ip_range(
+    state: Data<AppState>,
+    range: Json<IPRange>,
+    path: Path<(i32,)>,
+) -> impl Responder {
     let (rangeid,) = path.into_inner();
     match query_as!(
         IPRange,

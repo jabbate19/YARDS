@@ -1,12 +1,10 @@
-use crate::models::{
-    AppState, DHCPRange,
-};
+use crate::models::{AppState, DHCPRange};
 use actix_web::{
-    get, post, put,
+    delete, get, post, put,
     web::{Data, Json, Path},
-    HttpResponse, Responder, delete,
+    HttpResponse, Responder,
 };
-use sqlx::{query_as, query};
+use sqlx::{query, query_as};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -39,7 +37,11 @@ pub async fn get_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,)>) -> imp
     )
 )]
 #[post("/iprange/{iprangeid}/dhcp")]
-pub async fn add_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,)>, dhcp: Json<DHCPRange>) -> impl Responder {
+pub async fn add_ip_range_dhcp(
+    state: Data<AppState>,
+    path: Path<(i32,)>,
+    dhcp: Json<DHCPRange>,
+) -> impl Responder {
     let (_iprangeid,) = path.into_inner();
     match query_as!(
         DHCPRange,
@@ -68,17 +70,15 @@ pub async fn add_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,)>, dhcp: 
     )
 )]
 #[delete("/iprange/{iprangeid}/dhcp/{dhcpid}")]
-pub async fn delete_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,i32,)>) -> impl Responder {
-    let (_iprangeid,dhcpid,) = path.into_inner();
-    match query!(
-        "DELETE FROM dhcprange WHERE id = $1",
-        dhcpid
-    )
+pub async fn delete_ip_range_dhcp(state: Data<AppState>, path: Path<(i32, i32)>) -> impl Responder {
+    let (_iprangeid, dhcpid) = path.into_inner();
+    match query!("DELETE FROM dhcprange WHERE id = $1", dhcpid)
         .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Ok().finish(),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(
@@ -89,8 +89,12 @@ pub async fn delete_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,i32,)>)
     )
 )]
 #[put("/iprange/{iprangeid}/dhcp/{dhcpid}")]
-pub async fn edit_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,i32, )>, dhcp: Json<DHCPRange>) -> impl Responder {
-    let (_iprangeid,dhcpid,) = path.into_inner();
+pub async fn edit_ip_range_dhcp(
+    state: Data<AppState>,
+    path: Path<(i32, i32)>,
+    dhcp: Json<DHCPRange>,
+) -> impl Responder {
+    let (_iprangeid, dhcpid) = path.into_inner();
     match query_as!(
         DHCPRange,
         "UPDATE dhcprange SET iprangeid=$1, name=$2, dhcpstart=$3, dhcpend=$4, gateway=$5, default_dns=$6, lease_time=$7, serverid=$8 WHERE id = $9 RETURNING id, iprangeid, name, dhcpstart, dhcpend, gateway, default_dns, lease_Time, serverid",

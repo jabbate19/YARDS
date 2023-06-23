@@ -1,12 +1,10 @@
-use crate::models::{
-    AppState, DNSZone,
-};
+use crate::models::{AppState, DNSZone};
 use actix_web::{
-    get,
+    delete, get, post, put,
     web::{Data, Json, Path},
-    HttpResponse, Responder, post, delete, put,
+    HttpResponse, Responder,
 };
-use sqlx::{query_as, query};
+use sqlx::{query, query_as};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -59,15 +57,13 @@ pub async fn add_dns_zone(state: Data<AppState>, zone: Json<DNSZone>) -> impl Re
 #[delete("/dnszone/{zoneid}")]
 pub async fn delete_dns_zone(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
     let (zoneid,) = path.into_inner();
-    match query!(
-        "DELETE FROM dnszone WHERE id = $1",
-        zoneid
-    )
+    match query!("DELETE FROM dnszone WHERE id = $1", zoneid)
         .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Ok().finish(),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(
@@ -78,7 +74,11 @@ pub async fn delete_dns_zone(state: Data<AppState>, path: Path<(i32,)>) -> impl 
     )
 )]
 #[put("/dnszone/{zoneid}")]
-pub async fn edit_dns_zone(state: Data<AppState>, zone: Json<DNSZone>, path: Path<(i32,)>) -> impl Responder {
+pub async fn edit_dns_zone(
+    state: Data<AppState>,
+    zone: Json<DNSZone>,
+    path: Path<(i32,)>,
+) -> impl Responder {
     let (zoneid,) = path.into_inner();
     match query_as!(
         DNSZone,

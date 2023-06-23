@@ -1,6 +1,7 @@
 use chrono::serde::ts_seconds::serialize as to_ts;
 use serde::{Deserialize, Serialize};
 use sqlx::{
+    postgres::{PgHasArrayType, PgTypeInfo},
     types::chrono::{DateTime, Utc},
     FromRow, Pool, Postgres,
 };
@@ -56,12 +57,18 @@ pub enum IPType {
     Dynamic,
 }
 
-#[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+#[derive(sqlx::Type,Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
 pub struct Address {
     pub id: i32,
     pub interfaceid: i32,
     pub iprangeid: i32,
     pub iptype: IPType,
+}
+
+impl PgHasArrayType for Address {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("_address")
+    }
 }
 
 #[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
@@ -115,19 +122,31 @@ pub struct DNSZone {
 pub enum DNSRecordType {
     A,
     AAAA,
+    NS,
+    MX,
+    CNAME,
+    SOA,
+    SRV,
+    PTR,
 }
 
-#[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+#[derive(sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
 pub struct DNSRecord {
     pub id: i32,
     pub zoneid: i32,
     pub key: String,
-    pub recordtype: DNSRecordType,
     pub ttl: i32,
     pub value: String,
+    pub recordtype: DNSRecordType,
 }
 
-#[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+impl PgHasArrayType for DNSRecord {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("_dnsrecord")
+    }
+}
+
+#[derive(Debug, sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
 pub struct DHCPRange {
     pub id: i32,
     pub iprangeid: i32,

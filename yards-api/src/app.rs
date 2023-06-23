@@ -1,4 +1,4 @@
-use crate::{admin::*, models::*};
+use crate::{admin::*, agent::*, models::*};
 
 use actix_web::web::{self, scope, Data};
 
@@ -85,7 +85,11 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
             .service(dnsrecord::delete_dns_zone_record)
             .service(dnsrecord::edit_dns_zone_record),
     )
-    .service(scope("/agent"))
+    .service(
+        scope("/agent")
+            .service(generate::generate_dns_data)
+            .service(generate::generate_dhcp_data),
+    )
     .service(scope("/datadog"))
     .service(scope("/devices"))
     .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", openapi));

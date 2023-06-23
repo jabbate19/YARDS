@@ -1,10 +1,8 @@
-use crate::models::{
-    AppState, Server,
-};
+use crate::models::{AppState, Server};
 use actix_web::{
-    get, post,
+    delete, get, post,
     web::{Data, Json, Path},
-    HttpResponse, Responder, delete,
+    HttpResponse, Responder,
 };
 use base64::{engine::general_purpose, Engine as _};
 use passwords::PasswordGenerator;
@@ -71,13 +69,11 @@ pub async fn add_server(state: Data<AppState>, server: Json<Server>) -> impl Res
 #[delete("/server/{serverid}")]
 pub async fn delete_server(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
     let (serverid,) = path.into_inner();
-    match query!(
-        "DELETE FROM server WHERE id = $1",
-        serverid
-    )
+    match query!("DELETE FROM server WHERE id = $1", serverid)
         .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Ok().finish(),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }

@@ -1,12 +1,10 @@
-use crate::models::{
-    AppState, DNSRecord, DNSRecordType,
-};
+use crate::models::{AppState, DNSRecord, DNSRecordType};
 use actix_web::{
-    get,
-    web::{Data, Path, Json},
-    HttpResponse, Responder, post, delete, put,
+    delete, get, post, put,
+    web::{Data, Json, Path},
+    HttpResponse, Responder,
 };
-use sqlx::{query_as, query};
+use sqlx::{query, query_as};
 
 #[utoipa::path(
     context_path = "/admin",
@@ -35,7 +33,11 @@ pub async fn get_dns_zone_records(state: Data<AppState>, path: Path<(i32,)>) -> 
     )
 )]
 #[post("/dnszone/{zoneid}/record")]
-pub async fn add_dns_zone_record(state: Data<AppState>, path: Path<(i32,)>, record: Json<DNSRecord>) -> impl Responder {
+pub async fn add_dns_zone_record(
+    state: Data<AppState>,
+    path: Path<(i32,)>,
+    record: Json<DNSRecord>,
+) -> impl Responder {
     let (_zoneid,) = path.into_inner();
     match query_as!(
         DNSRecord,
@@ -61,17 +63,18 @@ pub async fn add_dns_zone_record(state: Data<AppState>, path: Path<(i32,)>, reco
     )
 )]
 #[delete("/dnszone/{zoneid}/record/{recordid}")]
-pub async fn delete_dns_zone_record(state: Data<AppState>, path: Path<(i32,i32,)>) -> impl Responder {
+pub async fn delete_dns_zone_record(
+    state: Data<AppState>,
+    path: Path<(i32, i32)>,
+) -> impl Responder {
     let (_zoneid, recordid) = path.into_inner();
-    match query!(
-        "DELETE FROM dnsrecord WHERE id = $1",
-        recordid
-    )
+    match query!("DELETE FROM dnsrecord WHERE id = $1", recordid)
         .execute(&state.db)
-        .await {
-            Ok(_) => HttpResponse::Ok().finish(),
-            Err(e) => HttpResponse::InternalServerError().body(e.to_string())
-        }
+        .await
+    {
+        Ok(_) => HttpResponse::Ok().finish(),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(
@@ -82,7 +85,11 @@ pub async fn delete_dns_zone_record(state: Data<AppState>, path: Path<(i32,i32,)
     )
 )]
 #[put("/dnszone/{zoneid}/record/{recordid}")]
-pub async fn edit_dns_zone_record(state: Data<AppState>, path: Path<(i32,i32,)>, record: Json<DNSRecord>) -> impl Responder {
+pub async fn edit_dns_zone_record(
+    state: Data<AppState>,
+    path: Path<(i32, i32)>,
+    record: Json<DNSRecord>,
+) -> impl Responder {
     let (_zoneid, recordid) = path.into_inner();
     match query_as!(
         DNSRecord,

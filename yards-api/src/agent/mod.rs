@@ -1,3 +1,3 @@
-pub mod routes;
+pub mod generate;
 #[cfg(test)]
 pub mod tests;
