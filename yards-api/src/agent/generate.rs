@@ -1,8 +1,11 @@
-use libyards::models::{Address, AppState, DHCPRange, DNSRecord, MXRecord, SRVRecord, DNSZone, IPType, StaticAddress};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
     HttpResponse, Responder,
+};
+use libyards::models::{
+    Address, AppState, DHCPRange, DNSRecord, DNSZone, IPType, MXRecord, Roles, SRVRecord,
+    StaticAddress,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -15,6 +18,26 @@ use sqlx::{
 struct DNSData {
     pub root: Option<DNSZone>,
     pub records: Option<Vec<DNSRecord>>,
+}
+
+#[utoipa::path(
+    context_path = "/api/agent",
+    responses(
+        (status = 200, description = "Provide Data for Server"),
+        (status = 500, description = "Error Created by Query"),
+    )
+)]
+#[get("/{serverid}/roles")]
+async fn get_server_roles(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
+    let (serverid,) = path.into_inner();
+    match query_as!(
+        Roles,
+        "SELECT EXISTS(SELECT * FROM dnszone WHERE serverid = $1) AS \"dns!\", EXISTS(SELECT * FROM dhcprange WHERE serverid = $1) AS \"dhcp!\"",
+        serverid
+    ).fetch_one(&state.db).await {
+        Ok(roles) => HttpResponse::Ok().json(roles),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 #[utoipa::path(
@@ -57,10 +80,16 @@ async fn generate_dns_data(state: Data<AppState>, path: Path<(i32,)>) -> impl Re
         "srv": {}
     });
     for mx in mx_data {
-        out["mx"].as_object_mut().unwrap().insert(mx.id.to_string(), serde_json::to_value(mx).unwrap());
+        out["mx"]
+            .as_object_mut()
+            .unwrap()
+            .insert(mx.id.to_string(), serde_json::to_value(mx).unwrap());
     }
     for srv in srv_data {
-        out["srv"].as_object_mut().unwrap().insert(srv.id.to_string(), serde_json::to_value(srv).unwrap());
+        out["srv"]
+            .as_object_mut()
+            .unwrap()
+            .insert(srv.id.to_string(), serde_json::to_value(srv).unwrap());
     }
     HttpResponse::Ok().json(out)
 }
@@ -69,7 +98,7 @@ async fn generate_dns_data(state: Data<AppState>, path: Path<(i32,)>) -> impl Re
 struct DHCPData {
     pub dhcp: Option<DHCPRange>,
     pub addresses: Option<Vec<Address>>,
-    pub statics: Option<Vec<Option<String>>>
+    pub statics: Option<Vec<Option<String>>>,
 }
 
 #[utoipa::path(
@@ -92,12 +121,13 @@ async fn generate_dhcp_data(state: Data<AppState>, path: Path<(i32,)>) -> impl R
         LEFT JOIN address ON dhcprange.iprangeid = address.iprangeid
         LEFT JOIN staticaddress ON staticaddress.addressid = address.id
         WHERE dhcprange.serverid = $1
-        GROUP BY dhcprange.id",
+        GROUP BY dhcprange.id, address.id",
         serverid
-    ).fetch_all(&state.db).await {
-        Ok(mut ranges) => {
-        HttpResponse::Ok().json(ranges)
-    },
+    )
+    .fetch_all(&state.db)
+    .await
+    {
+        Ok(mut ranges) => HttpResponse::Ok().json(ranges),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }

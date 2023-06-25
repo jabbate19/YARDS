@@ -1,10 +1,10 @@
-use libyards::models::{AppState, Server};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
     HttpResponse, Responder,
 };
 use base64::{engine::general_purpose, Engine as _};
+use libyards::models::{AppState, Server};
 use passwords::PasswordGenerator;
 use serde_json::json;
 use sha2::{Digest, Sha512};

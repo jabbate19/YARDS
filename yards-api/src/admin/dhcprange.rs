@@ -1,9 +1,9 @@
-use libyards::models::{AppState, DHCPRange};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path},
     HttpResponse, Responder,
 };
+use libyards::models::{AppState, DHCPRange};
 use sqlx::{query, query_as};
 
 #[utoipa::path(

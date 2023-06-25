@@ -1,9 +1,9 @@
-use libyards::models::{AppState, DDNS};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
     HttpResponse, Responder,
 };
+use libyards::models::{AppState, DDNS};
 use sqlx::{query, query_as};
 
 #[utoipa::path(

@@ -1,6 +1,6 @@
 use crate::{admin::*, agent::*};
-use libyards::models::*;
 use actix_web::web::{self, scope, Data};
+use libyards::models::*;
 
 use sqlx::postgres::PgPoolOptions;
 use std::env;
@@ -62,39 +62,41 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
     let openapi = ApiDoc::openapi();
     cfg.service(
         scope("/api")
-        .service(
-        scope("/admin")
-            .service(iprange::get_ip_range)
-            .service(iprange::add_ip_range)
-            .service(iprange::delete_ip_range)
-            .service(iprange::edit_ip_range)
-            .service(dhcprange::get_ip_range_dhcp)
-            .service(dhcprange::add_ip_range_dhcp)
-            .service(dhcprange::delete_ip_range_dhcp)
-            .service(dhcprange::edit_ip_range_dhcp)
-            .service(server::get_servers)
-            .service(server::add_server)
-            .service(server::delete_server)
-            .service(ddns::get_ddns)
-            .service(ddns::add_ddns)
-            .service(ddns::delete_ddns)
-            .service(dnszone::get_dns_zones)
-            .service(dnszone::add_dns_zone)
-            .service(dnszone::delete_dns_zone)
-            .service(dnszone::edit_dns_zone)
-            .service(dnsrecord::get_dns_zone_records)
-            .service(dnsrecord::add_dns_zone_record)
-            .service(dnsrecord::delete_dns_zone_record)
-            .service(dnsrecord::edit_dns_zone_record)
-        )
-    .service(
-        scope("/agent")
-            .service(generate::generate_dns_data)
-            .service(generate::generate_dhcp_data)
-    )
-    .service(scope("/datadog"))
-    .service(scope("/devices"))
-    .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", openapi)));
+            .service(
+                scope("/admin")
+                    .service(iprange::get_ip_range)
+                    .service(iprange::add_ip_range)
+                    .service(iprange::delete_ip_range)
+                    .service(iprange::edit_ip_range)
+                    .service(dhcprange::get_ip_range_dhcp)
+                    .service(dhcprange::add_ip_range_dhcp)
+                    .service(dhcprange::delete_ip_range_dhcp)
+                    .service(dhcprange::edit_ip_range_dhcp)
+                    .service(server::get_servers)
+                    .service(server::add_server)
+                    .service(server::delete_server)
+                    .service(ddns::get_ddns)
+                    .service(ddns::add_ddns)
+                    .service(ddns::delete_ddns)
+                    .service(dnszone::get_dns_zones)
+                    .service(dnszone::add_dns_zone)
+                    .service(dnszone::delete_dns_zone)
+                    .service(dnszone::edit_dns_zone)
+                    .service(dnsrecord::get_dns_zone_records)
+                    .service(dnsrecord::add_dns_zone_record)
+                    .service(dnsrecord::delete_dns_zone_record)
+                    .service(dnsrecord::edit_dns_zone_record),
+            )
+            .service(
+                scope("/agent")
+                    .service(generate::get_server_roles)
+                    .service(generate::generate_dns_data)
+                    .service(generate::generate_dhcp_data),
+            )
+            .service(scope("/datadog"))
+            .service(scope("/devices"))
+            .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", openapi)),
+    );
 }
 
 pub async fn get_app_data() -> Data<AppState> {
