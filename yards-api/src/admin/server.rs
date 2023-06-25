@@ -1,4 +1,4 @@
-use crate::models::{AppState, Server};
+use libyards::models::{AppState, Server};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
@@ -11,7 +11,7 @@ use sha2::{Digest, Sha512};
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all servers", body = [Server]),
         (status = 500, description = "Error Created by Query"),
@@ -29,7 +29,7 @@ pub async fn get_servers(state: Data<AppState>) -> impl Responder {
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "Server Added, Reterns JSON with new token"),
         (status = 500, description = "Error Created by Query"),
@@ -60,7 +60,7 @@ pub async fn add_server(state: Data<AppState>, server: Json<Server>) -> impl Res
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "Server Deleted"),
         (status = 500, description = "Error Created by Query"),

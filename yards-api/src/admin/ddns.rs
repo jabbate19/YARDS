@@ -1,4 +1,4 @@
-use crate::models::{AppState, DDNS};
+use libyards::models::{AppState, DDNS};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all ddns ranges", body = [DDNS]),
         (status = 500, description = "Error Created by Query"),
@@ -25,7 +25,7 @@ pub async fn get_ddns(state: Data<AppState>) -> impl Responder {
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "DDNS Range Added"),
         (status = 500, description = "Error Created by Query"),
@@ -48,7 +48,7 @@ pub async fn add_ddns(state: Data<AppState>, range: Json<DDNS>) -> impl Responde
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "DDNS Range Deleted"),
         (status = 500, description = "Error Created by Query"),

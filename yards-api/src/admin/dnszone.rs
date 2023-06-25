@@ -1,4 +1,4 @@
-use crate::models::{AppState, DNSZone};
+use libyards::models::{AppState, DNSZone};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path},
@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all dns zones", body = [DNSZone]),
         (status = 500, description = "Error Created by Query"),
@@ -25,7 +25,7 @@ pub async fn get_dns_zones(state: Data<AppState>) -> impl Responder {
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "DNS Zone Added"),
         (status = 500, description = "Error Created by Query"),
@@ -35,10 +35,16 @@ pub async fn get_dns_zones(state: Data<AppState>) -> impl Responder {
 pub async fn add_dns_zone(state: Data<AppState>, zone: Json<DNSZone>) -> impl Responder {
     match query_as!(
         DNSZone,
-        "INSERT INTO dnszone(zonename, dnsroot, serverid) VALUES ($1, $2, $3) RETURNING id, zonename, dnsroot, serverid",
+        "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, server) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
         zone.zonename,
         zone.dnsroot,
-        zone.serverid
+        zone.serverid,
+        zone.refresh,
+        zone.retry,
+        zone.expire,
+        zone.nxdomain,
+        zone.contact,
+        zone.server
     )
         .fetch_one(&state.db)
         .await {
@@ -48,7 +54,7 @@ pub async fn add_dns_zone(state: Data<AppState>, zone: Json<DNSZone>) -> impl Re
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "DNS Zone Deleted"),
         (status = 500, description = "Error Created by Query"),
@@ -67,7 +73,7 @@ pub async fn delete_dns_zone(state: Data<AppState>, path: Path<(i32,)>) -> impl 
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "DNS Zone Edited"),
         (status = 500, description = "Error Created by Query"),
@@ -82,11 +88,17 @@ pub async fn edit_dns_zone(
     let (zoneid,) = path.into_inner();
     match query_as!(
         DNSZone,
-        "UPDATE dnszone SET zonename=$1, dnsroot=$2, serverid=$3 WHERE id=$4 RETURNING id, zonename, dnsroot, serverid",
+        "UPDATE dnszone SET zonename=$1, dnsroot=$2, serverid=$3, refresh=$4, retry=$5, expire=$6, nxdomain=$7, contact=$8, server=$9 WHERE id=$10 RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
         zone.zonename,
         zone.dnsroot,
         zone.serverid,
-        zoneid
+        zone.refresh,
+        zone.retry,
+        zone.expire,
+        zone.nxdomain,
+        zone.contact,
+        zone.server,
+        zoneid,
     )
         .fetch_one(&state.db)
         .await {

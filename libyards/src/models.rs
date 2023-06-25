@@ -109,12 +109,18 @@ pub struct DDNS {
     pub zoneid: i32,
 }
 
-#[derive(Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+#[derive(sqlx::Type,Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
 pub struct DNSZone {
     pub id: i32,
     pub zonename: String,
-    pub dnsroot: String,
     pub serverid: i32,
+    pub dnsroot: String,
+    pub refresh: i32,
+    pub retry: i32,
+    pub expire: i32,
+    pub nxdomain: i32,
+    pub contact: String,
+    pub server: String,
 }
 
 #[derive(sqlx::Type, Copy, Serialize, Deserialize, Clone, ToSchema, Debug, PartialEq)]
@@ -128,6 +134,7 @@ pub enum DNSRecordType {
     SOA,
     SRV,
     PTR,
+    TXT,
 }
 
 #[derive(sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
@@ -144,6 +151,20 @@ impl PgHasArrayType for DNSRecord {
     fn array_type_info() -> PgTypeInfo {
         PgTypeInfo::with_name("_dnsrecord")
     }
+}
+
+#[derive(sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+pub struct MXRecord {
+    pub id: i32,
+    pub preference: i32
+}
+
+#[derive(sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
+pub struct SRVRecord {
+    pub id: i32,
+    pub preference: i32,
+    pub weight: i32,
+    pub port: i32
 }
 
 #[derive(Debug, sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]

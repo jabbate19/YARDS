@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
             .configure(configure_app)
             .app_data(app_data.clone())
     })
-    .bind(("0.0.0.0", 8080))?
+    .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }

@@ -1,4 +1,4 @@
-use crate::models::{Address, AppState, DHCPRange, DNSRecord, DNSZone, IPType, StaticAddress};
+use libyards::models::{Address, AppState, DHCPRange, DNSRecord, MXRecord, SRVRecord, DNSZone, IPType, StaticAddress};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path},
@@ -13,12 +13,12 @@ use sqlx::{
 
 #[derive(Serialize, Deserialize)]
 struct DNSData {
-    pub root: String,
+    pub root: Option<DNSZone>,
     pub records: Option<Vec<DNSRecord>>,
 }
 
 #[utoipa::path(
-    context_path = "/agent",
+    context_path = "/api/agent",
     responses(
         (status = 200, description = "Provide Data for Server"),
         (status = 500, description = "Error Created by Query"),
@@ -27,14 +27,42 @@ struct DNSData {
 #[get("/{serverid}/dns")]
 async fn generate_dns_data(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
     let (serverid,) = path.into_inner();
-    match query_as!(
+    let core_data = match query_as!(
         DNSData,
-        "SELECT dnszone.dnsroot AS \"root: String\", array_remove(ARRAY_AGG(dnsrecord.*), NULL) AS \"records: Vec<DNSRecord>\" FROM dnszone LEFT JOIN dnsrecord ON dnsrecord.zoneid = dnszone.id WHERE dnszone.serverid = $1 GROUP BY dnszone.id",
+        "SELECT ROW(dnszone.*)::dnszone AS \"root: DNSZone\", array_remove(ARRAY_AGG(dnsrecord.*), NULL) AS \"records: Vec<DNSRecord>\" FROM dnszone LEFT JOIN dnsrecord ON dnsrecord.zoneid = dnszone.id WHERE dnszone.serverid = $1 GROUP BY dnszone.id",
         serverid
     ).fetch_all(&state.db).await {
-        Ok(zones) => HttpResponse::Ok().json(zones),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        Ok(zones) => zones,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+    let mx_data = match query_as!(
+        MXRecord,
+        "SELECT * FROM mxrecord WHERE id IN (SELECT id FROM dnsrecord WHERE zoneid IN (SELECT id FROM dnszone WHERE serverid = $1))",
+        serverid
+    ).fetch_all(&state.db).await {
+        Ok(records) => records,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+    let srv_data = match query_as!(
+        SRVRecord,
+        "SELECT * FROM srvrecord WHERE id IN (SELECT id FROM dnsrecord WHERE zoneid IN (SELECT id FROM dnszone WHERE serverid = $1))",
+        serverid
+    ).fetch_all(&state.db).await {
+        Ok(records) => records,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+    let mut out = json!({
+        "data": core_data,
+        "mx": {},
+        "srv": {}
+    });
+    for mx in mx_data {
+        out["mx"].as_object_mut().unwrap().insert(mx.id.to_string(), serde_json::to_value(mx).unwrap());
     }
+    for srv in srv_data {
+        out["srv"].as_object_mut().unwrap().insert(srv.id.to_string(), serde_json::to_value(srv).unwrap());
+    }
+    HttpResponse::Ok().json(out)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -45,7 +73,7 @@ struct DHCPData {
 }
 
 #[utoipa::path(
-    context_path = "/agent",
+    context_path = "/api/agent",
     responses(
         (status = 200, description = "Provide Data for Server"),
         (status = 500, description = "Error Created by Query"),

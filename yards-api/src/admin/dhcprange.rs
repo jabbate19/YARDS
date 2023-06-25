@@ -1,4 +1,4 @@
-use crate::models::{AppState, DHCPRange};
+use libyards::models::{AppState, DHCPRange};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path},
@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all dhcp ranges for given IP range", body = [DHCPRange]),
         (status = 500, description = "Error Created by Query"),
@@ -30,7 +30,7 @@ pub async fn get_ip_range_dhcp(state: Data<AppState>, path: Path<(i32,)>) -> imp
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "IP Range DHCP Added"),
         (status = 500, description = "Error Created by Query"),
@@ -63,7 +63,7 @@ pub async fn add_ip_range_dhcp(
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "DHCP Range Deleted"),
         (status = 500, description = "Error Created by Query"),
@@ -82,7 +82,7 @@ pub async fn delete_ip_range_dhcp(state: Data<AppState>, path: Path<(i32, i32)>)
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "IP Range DHCP Edited"),
         (status = 500, description = "Error Created by Query"),

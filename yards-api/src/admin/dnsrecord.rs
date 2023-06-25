@@ -1,4 +1,4 @@
-use crate::models::{AppState, DNSRecord, DNSRecordType};
+use libyards::models::{AppState, DNSRecord, DNSRecordType};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path},
@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all DNS Records for given Zone", body = [DNSRecord]),
         (status = 500, description = "Error Created by Query"),
@@ -26,7 +26,7 @@ pub async fn get_dns_zone_records(state: Data<AppState>, path: Path<(i32,)>) -> 
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "DNS Record Added"),
         (status = 500, description = "Error Created by Query"),
@@ -56,7 +56,7 @@ pub async fn add_dns_zone_record(
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "DNS Record Deleted"),
         (status = 500, description = "Error Created by Query"),
@@ -78,7 +78,7 @@ pub async fn delete_dns_zone_record(
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "DNS Record Edited"),
         (status = 500, description = "Error Created by Query"),

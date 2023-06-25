@@ -1,4 +1,4 @@
-use crate::models::{AppState, IPRange, IPVersion};
+use libyards::models::{AppState, IPRange, IPVersion};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path},
@@ -7,7 +7,7 @@ use actix_web::{
 use sqlx::{query, query_as};
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "List all IP Ranges", body = [IPRange]),
         (status = 500, description = "Error Created by Query"),
@@ -22,7 +22,7 @@ pub async fn get_ip_range(state: Data<AppState>) -> impl Responder {
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 201, description = "IP Range Added"),
         (status = 500, description = "Error Created by Query"),
@@ -47,7 +47,7 @@ pub async fn add_ip_range(state: Data<AppState>, range: Json<IPRange>) -> impl R
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "IP Range Deleted"),
         (status = 500, description = "Error Created by Query"),
@@ -66,7 +66,7 @@ pub async fn delete_ip_range(state: Data<AppState>, path: Path<(i32,)>) -> impl 
 }
 
 #[utoipa::path(
-    context_path = "/admin",
+    context_path = "/api/admin",
     responses(
         (status = 200, description = "IP Range Edited"),
         (status = 500, description = "Error Created by Query"),
