@@ -36,7 +36,7 @@ pub async fn get_dns_zones(state: Data<AppState>, user: Option<ReqData<User>>) -
 pub async fn add_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, zone: Json<DNSZone>) -> impl Responder {
     match query_as!(
         DNSZone,
-        "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, server) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
+        "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, soa) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
         zone.zonename,
         zone.dnsroot,
         zone.serverid,
@@ -45,7 +45,7 @@ pub async fn add_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, zo
         zone.expire,
         zone.nxdomain,
         zone.contact,
-        zone.server
+        zone.soa
     )
         .fetch_one(&state.db)
         .await {
@@ -89,7 +89,7 @@ pub async fn edit_dns_zone(
     let (zoneid,) = path.into_inner();
     match query_as!(
         DNSZone,
-        "UPDATE dnszone SET zonename=$1, dnsroot=$2, serverid=$3, refresh=$4, retry=$5, expire=$6, nxdomain=$7, contact=$8, server=$9 WHERE id=$10 RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
+        "UPDATE dnszone SET zonename=$1, dnsroot=$2, serverid=$3, refresh=$4, retry=$5, expire=$6, nxdomain=$7, contact=$8, soa=$9 WHERE id=$10 RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, soa",
         zone.zonename,
         zone.dnsroot,
         zone.serverid,
@@ -98,7 +98,7 @@ pub async fn edit_dns_zone(
         zone.expire,
         zone.nxdomain,
         zone.contact,
-        zone.server,
+        zone.soa,
         zoneid,
     )
         .fetch_one(&state.db)

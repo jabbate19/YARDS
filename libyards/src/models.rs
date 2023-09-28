@@ -159,7 +159,7 @@ pub struct DNSZone {
     pub expire: i32,
     pub nxdomain: i32,
     pub contact: String,
-    pub server: String,
+    pub soa: String,
 }
 
 #[derive(sqlx::Type, Copy, Serialize, Deserialize, Clone, ToSchema, Debug, PartialEq)]
