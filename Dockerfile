@@ -6,9 +6,9 @@ RUN apt-get update && apt-get -y install libssl-dev pkg-config
 
 COPY libyards/ ./libyards/
 
-COPY libyards-api/ ./libyards-api/
+COPY yards-api/ ./yards-api/
 
-WORKDIR /app/libyards-api
+WORKDIR /app/yards-api
 
 RUN cargo build --release
 
