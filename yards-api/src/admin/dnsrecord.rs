@@ -1,10 +1,11 @@
 use actix_web::{
     delete, get, post, put,
-    web::{Data, Json, Path},
+    web::{Data, Json, Path, ReqData},
     HttpResponse, Responder,
 };
 use libyards::models::{AppState, DNSRecord, DNSRecordType};
 use sqlx::{query, query_as};
+use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -13,8 +14,8 @@ use sqlx::{query, query_as};
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[get("/dnszone/{zoneid}/record")]
-pub async fn get_dns_zone_records(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
+#[get("/dnszone/{zoneid}/record", wrap = "CSHAuth::enabled()")]
+pub async fn get_dns_zone_records(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32,)>) -> impl Responder {
     let (zoneid,) = path.into_inner();
     match query_as!(DNSRecord, "SELECT id, zoneid, key, recordtype AS \"recordtype: DNSRecordType\", ttl, value FROM dnsrecord WHERE zoneid = $1", zoneid)
         .fetch_all(&state.db)
@@ -32,9 +33,9 @@ pub async fn get_dns_zone_records(state: Data<AppState>, path: Path<(i32,)>) -> 
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[post("/dnszone/{zoneid}/record")]
+#[post("/dnszone/{zoneid}/record", wrap = "CSHAuth::enabled()")]
 pub async fn add_dns_zone_record(
-    state: Data<AppState>,
+    state: Data<AppState>, user: Option<ReqData<User>>,
     path: Path<(i32,)>,
     record: Json<DNSRecord>,
 ) -> impl Responder {
@@ -62,9 +63,9 @@ pub async fn add_dns_zone_record(
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[delete("/dnszone/{zoneid}/record/{recordid}")]
+#[delete("/dnszone/{zoneid}/record/{recordid}", wrap = "CSHAuth::enabled()")]
 pub async fn delete_dns_zone_record(
-    state: Data<AppState>,
+    state: Data<AppState>, user: Option<ReqData<User>>,
     path: Path<(i32, i32)>,
 ) -> impl Responder {
     let (_zoneid, recordid) = path.into_inner();
@@ -84,9 +85,9 @@ pub async fn delete_dns_zone_record(
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[put("/dnszone/{zoneid}/record/{recordid}")]
+#[put("/dnszone/{zoneid}/record/{recordid}", wrap = "CSHAuth::enabled()")]
 pub async fn edit_dns_zone_record(
-    state: Data<AppState>,
+    state: Data<AppState>, user: Option<ReqData<User>>,
     path: Path<(i32, i32)>,
     record: Json<DNSRecord>,
 ) -> impl Responder {

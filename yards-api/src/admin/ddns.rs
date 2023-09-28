@@ -1,10 +1,11 @@
 use actix_web::{
     delete, get, post,
-    web::{Data, Json, Path},
+    web::{Data, Json, Path, ReqData},
     HttpResponse, Responder,
 };
 use libyards::models::{AppState, DDNS};
 use sqlx::{query, query_as};
+use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -13,7 +14,7 @@ use sqlx::{query, query_as};
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[get("/ddns")]
+#[get("/ddns", wrap = "CSHAuth::admin_only()")]
 pub async fn get_ddns(state: Data<AppState>) -> impl Responder {
     match query_as!(DDNS, "SELECT * FROM ddns")
         .fetch_all(&state.db)
@@ -31,7 +32,7 @@ pub async fn get_ddns(state: Data<AppState>) -> impl Responder {
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[post("/ddns")]
+#[post("/ddns", wrap = "CSHAuth::admin_only()")]
 pub async fn add_ddns(state: Data<AppState>, range: Json<DDNS>) -> impl Responder {
     match query_as!(
         DDNS,
@@ -54,7 +55,7 @@ pub async fn add_ddns(state: Data<AppState>, range: Json<DDNS>) -> impl Responde
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[delete("/ddns/{iprangeid}/{zoneid}")]
+#[delete("/ddns/{iprangeid}/{zoneid}", wrap = "CSHAuth::admin_only()")]
 pub async fn delete_ddns(state: Data<AppState>, path: Path<(i32, i32)>) -> impl Responder {
     let (iprangeid, zoneid) = path.into_inner();
     match query!(

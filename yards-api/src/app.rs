@@ -1,9 +1,13 @@
-use crate::{admin::*, agent::*};
+use crate::auth::update_cache;
+use crate::{admin::*, agent::*, device::*};
 use actix_web::web::{self, scope, Data};
 use libyards::models::*;
 
+use futures::lock::Mutex;
+use openssl::pkey::{PKey, Public};
 use sqlx::postgres::PgPoolOptions;
-use std::env;
+use std::sync::Arc;
+use std::{collections::HashMap, env};
 use utoipa::{
     openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
     Modify, OpenApi,
@@ -88,13 +92,18 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
                     .service(dnsrecord::edit_dns_zone_record),
             )
             .service(
+                scope("/device")
+                    .service(device::get_devices)
+                    .service(device::get_device_info)
+            )
+            .service(
                 scope("/agent")
                     .service(generate::get_server_roles)
                     .service(generate::generate_dns_data)
-                    .service(generate::generate_dhcp_data),
+                    .service(generate::generate_dhcp_data)
+                    .service(generate::success),
             )
             .service(scope("/datadog"))
-            .service(scope("/devices"))
             .service(SwaggerUi::new("/docs/{_:.*}").url("/api-doc/openapi.json", openapi)),
     );
 }
@@ -104,5 +113,10 @@ pub async fn get_app_data() -> Data<AppState> {
         .connect(&env::var("DATABASE_URL").unwrap())
         .await
         .unwrap();
-    Data::new(AppState { db: pool })
+    let jwt_cache: Arc<Mutex<HashMap<String, PKey<Public>>>> = Arc::new(Mutex::new(HashMap::new()));
+    update_cache(jwt_cache.clone()).await.unwrap();
+    Data::new(AppState {
+        db: pool,
+        jwt_cache,
+    })
 }

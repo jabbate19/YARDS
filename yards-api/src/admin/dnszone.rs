@@ -1,10 +1,11 @@
 use actix_web::{
     delete, get, post, put,
-    web::{Data, Json, Path},
+    web::{Data, Json, Path, ReqData},
     HttpResponse, Responder,
 };
 use libyards::models::{AppState, DNSZone};
 use sqlx::{query, query_as};
+use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -13,8 +14,8 @@ use sqlx::{query, query_as};
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[get("/dnszone")]
-pub async fn get_dns_zones(state: Data<AppState>) -> impl Responder {
+#[get("/dnszone", wrap = "CSHAuth::admin_only()")]
+pub async fn get_dns_zones(state: Data<AppState>, user: Option<ReqData<User>>) -> impl Responder {
     match query_as!(DNSZone, "SELECT * FROM dnszone")
         .fetch_all(&state.db)
         .await
@@ -31,8 +32,8 @@ pub async fn get_dns_zones(state: Data<AppState>) -> impl Responder {
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[post("/dnszone")]
-pub async fn add_dns_zone(state: Data<AppState>, zone: Json<DNSZone>) -> impl Responder {
+#[post("/dnszone", wrap = "CSHAuth::admin_only()")]
+pub async fn add_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, zone: Json<DNSZone>) -> impl Responder {
     match query_as!(
         DNSZone,
         "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, server) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
@@ -60,8 +61,8 @@ pub async fn add_dns_zone(state: Data<AppState>, zone: Json<DNSZone>) -> impl Re
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[delete("/dnszone/{zoneid}")]
-pub async fn delete_dns_zone(state: Data<AppState>, path: Path<(i32,)>) -> impl Responder {
+#[delete("/dnszone/{zoneid}", wrap = "CSHAuth::admin_only()")]
+pub async fn delete_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32,)>) -> impl Responder {
     let (zoneid,) = path.into_inner();
     match query!("DELETE FROM dnszone WHERE id = $1", zoneid)
         .execute(&state.db)
@@ -79,9 +80,9 @@ pub async fn delete_dns_zone(state: Data<AppState>, path: Path<(i32,)>) -> impl 
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[put("/dnszone/{zoneid}")]
+#[put("/dnszone/{zoneid}", wrap = "CSHAuth::admin_only()")]
 pub async fn edit_dns_zone(
-    state: Data<AppState>,
+    state: Data<AppState>, user: Option<ReqData<User>>,
     zone: Json<DNSZone>,
     path: Path<(i32,)>,
 ) -> impl Responder {

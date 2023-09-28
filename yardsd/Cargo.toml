@@ -12,3 +12,5 @@ serde_json = "1.0.97"
 tera = "1.19.0"
 tokio = { version = "1.28.2", features = ["full"] }
 libyards = { path = "../libyards" }
+anyhow = "1.0.75"
+sha1 = "0.10.6"

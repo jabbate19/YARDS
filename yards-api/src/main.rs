@@ -7,6 +7,11 @@ use std::env;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let host = env::var("HOST").unwrap_or("0.0.0.0".to_string());
+    let port: u16 = env::var("PORT")
+        .unwrap_or("8080".to_string())
+        .parse()
+        .unwrap();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let app_data = get_app_data().await;
     HttpServer::new(move || {
@@ -16,6 +21,7 @@ async fn main() -> std::io::Result<()> {
             .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
+        let cors = Cors::permissive();
         App::new()
             .wrap(cors)
             .wrap(Logger::new(
@@ -24,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .configure(configure_app)
             .app_data(app_data.clone())
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((host, port))?
     .run()
     .await
 }
