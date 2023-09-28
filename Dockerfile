@@ -12,4 +12,4 @@ WORKDIR /app/yards-api
 
 RUN cargo build --release
 
-CMD ["./target/release/yards-api"]
+CMD ["./target/release/yards_api"]
