@@ -60,7 +60,7 @@ pub struct User {
 
 impl User {
     fn admin(&self) -> bool {
-        self.groups.contains(&"/eboard".to_string()) || self.groups.contains(&"/admin/rtp".to_string())
+        self.groups.contains(&"/eboard".to_string()) || self.groups.contains(&"/admins/rtp".to_string())
     }
 }
 
