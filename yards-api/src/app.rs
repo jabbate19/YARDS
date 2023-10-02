@@ -89,12 +89,14 @@ pub fn configure_app(cfg: &mut web::ServiceConfig) {
                     .service(dnsrecord::get_dns_zone_records)
                     .service(dnsrecord::add_dns_zone_record)
                     .service(dnsrecord::delete_dns_zone_record)
-                    .service(dnsrecord::edit_dns_zone_record),
+                    .service(dnsrecord::edit_dns_zone_record)
+                    .service(group::get_groups),
             )
             .service(
                 scope("/device")
+                    .service(device::search_data)
                     .service(device::get_devices)
-                    .service(device::get_device_info)
+                    .service(device::get_device_info),
             )
             .service(
                 scope("/agent")

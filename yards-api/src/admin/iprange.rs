@@ -1,3 +1,4 @@
+use crate::auth::{CSHAuth, User};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path, ReqData},
@@ -5,7 +6,6 @@ use actix_web::{
 };
 use libyards::models::{AppState, IPRange, IPVersion};
 use sqlx::{query, query_as};
-use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -14,7 +14,7 @@ use crate::auth::{CSHAuth, User};
         (status = 500, description = "Error Created by Query"),
     )
 )]
-#[get("/iprange", wrap = "CSHAuth::admin_only()")]
+#[get("/iprange", wrap = "CSHAuth::enabled()")]
 pub async fn get_ip_range(state: Data<AppState>, user: Option<ReqData<User>>) -> impl Responder {
     match query_as!(IPRange, "SELECT id, name, ipversion AS \"ipversion: IPVersion\", networkid, cidr, description, vlan, gateway, default_dns, dns_domain, default_lease_time, max_lease_time, min_lease_time FROM iprange").fetch_all(&state.db).await {
         Ok(servers) => HttpResponse::Ok().json(servers),
@@ -30,7 +30,11 @@ pub async fn get_ip_range(state: Data<AppState>, user: Option<ReqData<User>>) ->
     )
 )]
 #[post("/iprange", wrap = "CSHAuth::admin_only()")]
-pub async fn add_ip_range(state: Data<AppState>, user: Option<ReqData<User>>, range: Json<IPRange>) -> impl Responder {
+pub async fn add_ip_range(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    range: Json<IPRange>,
+) -> impl Responder {
     match query_as!(
         IPRange,
         "INSERT INTO iprange(name, ipversion, networkid, cidr, description, vlan, gateway, default_dns, dns_domain, default_lease_time, max_lease_time, min_lease_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, name, ipversion as \"ipversion: _\", networkid, cidr, description, vlan, gateway, default_dns, dns_domain, default_lease_time, max_lease_time, min_lease_time",
@@ -62,7 +66,11 @@ pub async fn add_ip_range(state: Data<AppState>, user: Option<ReqData<User>>, ra
     )
 )]
 #[delete("/iprange/{rangeid}", wrap = "CSHAuth::admin_only()")]
-pub async fn delete_ip_range(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32,)>) -> impl Responder {
+pub async fn delete_ip_range(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    path: Path<(i32,)>,
+) -> impl Responder {
     let (rangeid,) = path.into_inner();
     match query!("DELETE FROM iprange WHERE id = $1", rangeid)
         .execute(&state.db)
@@ -82,7 +90,8 @@ pub async fn delete_ip_range(state: Data<AppState>, user: Option<ReqData<User>>,
 )]
 #[put("/iprange/{rangeid}", wrap = "CSHAuth::admin_only()")]
 pub async fn edit_ip_range(
-    state: Data<AppState>, user: Option<ReqData<User>>,
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
     range: Json<IPRange>,
     path: Path<(i32,)>,
 ) -> impl Responder {

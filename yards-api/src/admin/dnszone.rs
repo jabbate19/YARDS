@@ -1,3 +1,4 @@
+use crate::auth::{CSHAuth, User};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path, ReqData},
@@ -5,7 +6,6 @@ use actix_web::{
 };
 use libyards::models::{AppState, DNSZone};
 use sqlx::{query, query_as};
-use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -33,10 +33,14 @@ pub async fn get_dns_zones(state: Data<AppState>, user: Option<ReqData<User>>) -
     )
 )]
 #[post("/dnszone", wrap = "CSHAuth::admin_only()")]
-pub async fn add_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, zone: Json<DNSZone>) -> impl Responder {
+pub async fn add_dns_zone(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    zone: Json<DNSZone>,
+) -> impl Responder {
     match query_as!(
         DNSZone,
-        "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, soa) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, server",
+        "INSERT INTO dnszone(zonename, dnsroot, serverid, refresh, retry, expire, nxdomain, contact, soa) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, zonename, serverid, dnsroot, refresh, retry, expire, nxdomain, contact, soa",
         zone.zonename,
         zone.dnsroot,
         zone.serverid,
@@ -62,7 +66,11 @@ pub async fn add_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, zo
     )
 )]
 #[delete("/dnszone/{zoneid}", wrap = "CSHAuth::admin_only()")]
-pub async fn delete_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32,)>) -> impl Responder {
+pub async fn delete_dns_zone(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    path: Path<(i32,)>,
+) -> impl Responder {
     let (zoneid,) = path.into_inner();
     match query!("DELETE FROM dnszone WHERE id = $1", zoneid)
         .execute(&state.db)
@@ -82,7 +90,8 @@ pub async fn delete_dns_zone(state: Data<AppState>, user: Option<ReqData<User>>,
 )]
 #[put("/dnszone/{zoneid}", wrap = "CSHAuth::admin_only()")]
 pub async fn edit_dns_zone(
-    state: Data<AppState>, user: Option<ReqData<User>>,
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
     zone: Json<DNSZone>,
     path: Path<(i32,)>,
 ) -> impl Responder {

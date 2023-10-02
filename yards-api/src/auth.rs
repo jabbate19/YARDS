@@ -60,7 +60,8 @@ pub struct User {
 
 impl User {
     fn admin(&self) -> bool {
-        self.groups.contains(&"/eboard".to_string()) || self.groups.contains(&"/admins/rtp".to_string())
+        self.groups.contains(&"/eboard".to_string())
+            || self.groups.contains(&"/admins/rtp".to_string())
     }
 }
 
@@ -184,15 +185,24 @@ pub struct CSHAuth {
 
 impl CSHAuth {
     pub fn admin_only() -> Self {
-        Self { enabled: true, admin: true }
+        Self {
+            enabled: true,
+            admin: true,
+        }
     }
 
     pub fn enabled() -> Self {
-        Self { enabled: true, admin: false }
+        Self {
+            enabled: true,
+            admin: false,
+        }
     }
 
     pub fn disabled() -> Self {
-        Self { enabled: false, admin: false }
+        Self {
+            enabled: false,
+            admin: false,
+        }
     }
 }
 

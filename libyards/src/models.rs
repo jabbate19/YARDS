@@ -220,12 +220,24 @@ pub struct MXRecord {
     pub preference: i32
 }
 
+impl PgHasArrayType for MXRecord {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("_mxrecord")
+    }
+}
+
 #[derive(sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
 pub struct SRVRecord {
     pub id: i32,
     pub preference: i32,
     pub weight: i32,
     pub port: i32
+}
+
+impl PgHasArrayType for SRVRecord {
+    fn array_type_info() -> PgTypeInfo {
+        PgTypeInfo::with_name("_srvrecord")
+    }
 }
 
 #[derive(Debug, sqlx::Type, Serialize, Deserialize, FromRow, ToSchema, Clone, PartialEq)]
@@ -268,4 +280,10 @@ pub struct DHCPOut {
     pub vlan_id: i32,
     pub vlan_name: String,
     pub ranges: Vec<IPRangeOut>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Group {
+    pub group: String,
+    pub binding: String,
 }

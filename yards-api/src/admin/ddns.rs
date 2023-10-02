@@ -1,3 +1,4 @@
+use crate::auth::{CSHAuth, User};
 use actix_web::{
     delete, get, post,
     web::{Data, Json, Path, ReqData},
@@ -5,7 +6,6 @@ use actix_web::{
 };
 use libyards::models::{AppState, DDNS};
 use sqlx::{query, query_as};
-use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",

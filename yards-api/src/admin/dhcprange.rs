@@ -1,3 +1,4 @@
+use crate::auth::{CSHAuth, User};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path, ReqData},
@@ -5,7 +6,6 @@ use actix_web::{
 };
 use libyards::models::{AppState, DHCPRange};
 use sqlx::{query, query_as};
-use crate::auth::{CSHAuth, User};
 
 #[utoipa::path(
     context_path = "/api/admin",
@@ -15,7 +15,11 @@ use crate::auth::{CSHAuth, User};
     )
 )]
 #[get("/iprange/{iprangeid}/dhcp", wrap = "CSHAuth::admin_only()")]
-pub async fn get_ip_range_dhcp(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32,)>) -> impl Responder {
+pub async fn get_ip_range_dhcp(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    path: Path<(i32,)>,
+) -> impl Responder {
     let (iprangeid,) = path.into_inner();
     match query_as!(
         DHCPRange,
@@ -39,7 +43,8 @@ pub async fn get_ip_range_dhcp(state: Data<AppState>, user: Option<ReqData<User>
 )]
 #[post("/iprange/{iprangeid}/dhcp", wrap = "CSHAuth::admin_only()")]
 pub async fn add_ip_range_dhcp(
-    state: Data<AppState>, user: Option<ReqData<User>>,
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
     path: Path<(i32,)>,
     dhcp: Json<DHCPRange>,
 ) -> impl Responder {
@@ -68,7 +73,11 @@ pub async fn add_ip_range_dhcp(
     )
 )]
 #[delete("/iprange/{iprangeid}/dhcp/{dhcpid}", wrap = "CSHAuth::admin_only()")]
-pub async fn delete_ip_range_dhcp(state: Data<AppState>, user: Option<ReqData<User>>, path: Path<(i32, i32)>) -> impl Responder {
+pub async fn delete_ip_range_dhcp(
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
+    path: Path<(i32, i32)>,
+) -> impl Responder {
     let (_iprangeid, dhcpid) = path.into_inner();
     match query!("DELETE FROM dhcprange WHERE id = $1", dhcpid)
         .execute(&state.db)
@@ -88,7 +97,8 @@ pub async fn delete_ip_range_dhcp(state: Data<AppState>, user: Option<ReqData<Us
 )]
 #[put("/iprange/{iprangeid}/dhcp/{dhcpid}", wrap = "CSHAuth::admin_only()")]
 pub async fn edit_ip_range_dhcp(
-    state: Data<AppState>, user: Option<ReqData<User>>,
+    state: Data<AppState>,
+    user: Option<ReqData<User>>,
     path: Path<(i32, i32)>,
     dhcp: Json<DHCPRange>,
 ) -> impl Responder {
